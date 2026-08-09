@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-====================================================================
         MON AGENT DE CARRIÈRE  —  Armel Raoul N'GUESSAN
-====================================================================
-Agent personnel : cherche de vraies offres (Adzuna) + offres locales,
-les note, rédige lettres et fiches d'entretien, tient un suivi.
-Clés : config/cles_api.json en local, ou st.secrets si hébergé.
+Cherche de vraies offres (Adzuna) + offres locales, les note,
+rédige lettres, fiches d'entretien et CV. Clés : config/cles_api.json
+en local, ou st.secrets si hébergé.
 """
 import json, csv, os, re, sys, datetime as dt
 
@@ -20,7 +18,6 @@ def charger_profil():
     return json.load(open(os.path.join(CONFIG, "mon_profil.json"), encoding="utf-8"))
 
 def charger_cles():
-    """Local : config/cles_api.json. Hébergé : bascule sur st.secrets."""
     chemin = os.path.join(CONFIG, "cles_api.json")
     if os.path.exists(chemin):
         return json.load(open(chemin, encoding="utf-8"))
@@ -41,9 +38,6 @@ def charger_cles():
                 "email_recap": {"actif": False}}
 
 
-# ================================================================== #
-#  RECHERCHE DE VRAIES OFFRES (Adzuna)
-# ================================================================== #
 def rechercher_offres_reelles(profil, cles):
     conf = cles.get("adzuna", {})
     if not conf.get("actif"):
@@ -101,9 +95,6 @@ def _offres_demo():
     ]
 
 
-# ================================================================== #
-#  OFFRES LOCALES (Abidjan) — CSV rempli à la main
-# ================================================================== #
 def rechercher_offres_locales(profil):
     chemin = os.path.join(CONFIG, "offres_locales.csv")
     if not os.path.exists(chemin): return []
@@ -129,9 +120,6 @@ def rechercher_offres_locales(profil):
     return offres
 
 
-# ================================================================== #
-#  Mémoire · Filtrage · Scoring
-# ================================================================== #
 def charger_memoire():
     return json.load(open(MEM, encoding="utf-8")) if os.path.exists(MEM) \
            else {"offres_vues": [], "historique": []}
@@ -179,9 +167,6 @@ def verdict(s):
             "Match moyen" if s>=40 else "Match faible")
 
 
-# ================================================================== #
-#  Lettre + fiche entretien
-# ================================================================== #
 def generer_lettre(offre, profil, cles):
     conf = cles.get("anthropic", {})
     if conf.get("actif"):
@@ -249,9 +234,6 @@ def fiche_entretien(offre, profil):
     return "\n".join(L)
 
 
-# ================================================================== #
-#  Boucle principale (ligne de commande)
-# ================================================================== #
 def lancer(top_n=5):
     print("="*64); print(" MON AGENT DE CARRIÈRE — démarrage"); print("="*64)
     profil, cles, mem = charger_profil(), charger_cles(), charger_memoire()

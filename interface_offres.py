@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-INTERFACE WEB — Gérer mes offres locales & lancer l'agent
+INTERFACE WEB — offres locales, agent, CV, suivi
 Lancement : streamlit run interface_offres.py
 """
 import os, re
 import pandas as pd
 import streamlit as st
 import mon_agent as A
+from cv_generator import generer_cv
 
 BASE   = os.path.dirname(os.path.abspath(__file__))
 CONFIG = os.path.join(BASE, "config")
@@ -29,13 +30,13 @@ def ecrire_offres(df):
     df.to_csv(CSV_LOCAL, sep=";", index=False)
 
 st.markdown("<h1 style='color:#1f3b57'>💼 Mon agent de carrière</h1>", unsafe_allow_html=True)
-st.caption("Gérez vos offres locales (Abidjan) et lancez votre recherche — sans code.")
+st.caption("Offres locales, recherche automatisée, lettres, fiches d'entretien et CV — sans code.")
 
 profil = A.charger_profil()
 cles   = A.charger_cles()
 
-onglet1, onglet2, onglet3 = st.tabs(
-    ["📝 Mes offres locales", "🚀 Lancer l'agent", "📊 Suivi & candidatures"])
+onglet1, onglet2, onglet3, onglet4 = st.tabs(
+    ["📝 Mes offres locales", "🚀 Lancer l'agent", "📄 Mon CV", "📊 Suivi"])
 
 # ---------------- ONGLET 1 : offres locales ----------------
 with onglet1:
@@ -88,9 +89,10 @@ with onglet2:
     c1.metric("Offres locales", len(lire_offres()))
     c2.metric("Adzuna (télétravail)", "Activé ✅" if adz else "Désactivé")
     mem = A.charger_memoire(); c3.metric("Offres en mémoire", len(mem["offres_vues"]))
-    col1, col2 = st.columns([2,1])
+    col1, col2, col3 = st.columns([2,1,1])
     top_n = col1.slider("Top N", 1, 15, 5)
     reset_mem = col2.checkbox("🔄 Ignorer la mémoire", value=False)
+    faire_cv = col3.checkbox("📄 CV ciblé par offre", value=True)
     if st.button("🚀 Lancer l'agent", type="primary", use_container_width=True):
         if reset_mem and os.path.exists(A.MEM): os.remove(A.MEM)
         with st.status("L'agent travaille…", expanded=True) as status:
@@ -104,13 +106,12 @@ with onglet2:
             resultats = []
             for o in classees[:top_n]:
                 lettre = A.generer_lettre(o, profil, cles); fiche = A.fiche_entretien(o, profil)
-                base = f"{o['id']}_{re.sub(r'[^A-Za-z0-9]','_',o['entreprise'])[:20]}"
-                open(os.path.join(OUT, f"lettre_{base}.txt"),"w",encoding="utf-8").write(lettre)
-                open(os.path.join(OUT, f"entretien_{base}.txt"),"w",encoding="utf-8").write(fiche)
-                resultats.append({"offre":o,"lettre":lettre,"fiche":fiche})
+                cv_bytes = generer_cv(profil, offre=o, en_memoire=True) if faire_cv else None
+                resultats.append({"offre":o,"lettre":lettre,"fiche":fiche,"cv":cv_bytes})
             A.memoriser(classees[:top_n], mem)
             status.update(label=f"✅ {len(resultats)} candidatures préparées !", state="complete")
         st.session_state["resultats"] = resultats
+
     if st.session_state.get("resultats"):
         resultats = st.session_state["resultats"]
         if not resultats:
@@ -129,16 +130,54 @@ with onglet2:
                     ca, cb = st.columns(2)
                     ca.markdown("**✅ Atouts :** " + (", ".join(o.get("_couvertes", [])) or "—"))
                     cb.markdown("**📚 À développer :** " + (", ".join(o.get("_manquantes", [])) or "—"))
-                    t1, t2 = st.tabs(["✉️ Lettre", "🎤 Entretien"])
-                    with t1:
+                    tabs = st.tabs(["✉️ Lettre", "🎤 Entretien", "📄 CV ciblé"])
+                    with tabs[0]:
                         st.text(r["lettre"])
-                        st.download_button("⬇️ Lettre", r["lettre"], file_name=f"lettre_{o['id']}.txt", key="l"+o["id"])
-                    with t2:
+                        st.download_button("⬇️ Lettre", r["lettre"],
+                            file_name=f"lettre_{o['id']}.txt", key="l"+o["id"])
+                    with tabs[1]:
                         st.text(r["fiche"])
-                        st.download_button("⬇️ Fiche", r["fiche"], file_name=f"entretien_{o['id']}.txt", key="f"+o["id"])
+                        st.download_button("⬇️ Fiche", r["fiche"],
+                            file_name=f"entretien_{o['id']}.txt", key="f"+o["id"])
+                    with tabs[2]:
+                        if r.get("cv"):
+                            st.success("CV adapté à cette offre (compétences ciblées en tête).")
+                            st.download_button("⬇️ Télécharger le CV ciblé (.docx)", r["cv"],
+                                file_name=f"CV_{re.sub(r'[^A-Za-z0-9]','_',o['entreprise'])[:15]}.docx",
+                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                key="cv"+o["id"])
+                        else:
+                            st.info("Cochez « CV ciblé par offre » avant de lancer l'agent.")
 
-# ---------------- ONGLET 3 : suivi ----------------
+# ---------------- ONGLET 3 : Mon CV ----------------
 with onglet3:
+    st.subheader("📄 Générer mon CV")
+    st.write("Créez un CV professionnel à partir de votre profil. "
+             "Vous pouvez aussi le **cibler sur un poste** précis : les compétences "
+             "correspondantes remontent en tête.")
+    poste_cible = st.selectbox("Intitulé du poste (en-tête du CV)",
+                               profil.get("postes_vises", ["Data Analyst"]))
+    mots_cibles = st.text_input("Compétences à mettre en avant (optionnel, séparées par des virgules)",
+                                placeholder="SQL, Power BI, ETL")
+    if st.button("🪄 Générer mon CV", type="primary"):
+        offre_fictive = None
+        if mots_cibles.strip():
+            offre_fictive = {"titre": poste_cible, "entreprise": "",
+                             "description": mots_cibles, "competences_requises": [
+                                 m.strip() for m in mots_cibles.split(",") if m.strip()]}
+        # forcer le titre choisi
+        prof2 = dict(profil); prof2["postes_vises"] = [poste_cible] + profil.get("postes_vises", [])
+        cv_bytes = generer_cv(prof2, offre=offre_fictive, en_memoire=True)
+        st.success("✅ CV généré !")
+        st.download_button("⬇️ Télécharger mon CV (.docx)", cv_bytes,
+            file_name=f"CV_{re.sub(r'[^A-Za-z0-9]','_',profil['nom'])}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    st.divider()
+    st.caption("💡 Astuce : les expériences et le résumé du CV se modifient dans "
+               "config/mon_profil.json (section « cv »).")
+
+# ---------------- ONGLET 4 : suivi ----------------
+with onglet4:
     st.subheader("📊 Tableau de suivi des candidatures")
     suivi = os.path.join(OUT, "suivi_candidatures.csv")
     if os.path.exists(suivi):
@@ -148,4 +187,4 @@ with onglet3:
             data=dfs.to_csv(sep=";", index=False).encode("utf-8"),
             file_name="suivi_candidatures.csv", mime="text/csv")
     else:
-        st.info("Aucune candidature encore. Lancez l'agent dans l'onglet précédent.")
+        st.info("Aucune candidature encore. Lancez l'agent dans l'onglet « Lancer l'agent ».")
