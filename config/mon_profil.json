@@ -1,0 +1,34 @@
+{
+  "nom": "Armel Raoul N'GUESSAN",
+  "email": "armel-raoul.nguessan@form.ceditech.ci",
+  "telephone": "+225 07 07 46 48 44",
+  "titre_actuel": "Formateur — Pédagogie et développement des compétences",
+  "localisation": "Abidjan, Côte d'Ivoire",
+  "annees_experience": 6,
+  "objectif": "Évoluer vers un poste de Data Analyst / Data Architect, en présentiel à Abidjan ou en télétravail.",
+
+  "recherche": {
+    "mots_cles": ["data analyst télétravail", "data analyst remote", "business intelligence remote", "data architect télétravail"],
+    "localisation_recherche": "France",
+    "pays_code": "fr",
+    "rayon_km": 0,
+    "resultats_par_recherche": 20
+  },
+
+  "postes_vises": [
+    "Data Analyst", "Data Architect", "Formateur Data / IA", "Consultant Business Intelligence"
+  ],
+  "competences": [
+    "Excel avancé", "Power Query", "Power Pivot", "DAX",
+    "Python", "pandas", "scikit-learn", "SQL",
+    "Data visualization", "Power BI",
+    "ETL", "Modélisation dimensionnelle", "Data profiling",
+    "Ingénierie pédagogique", "Animation de formation", "PMBOK"
+  ],
+  "langues": ["Français (natif)", "Anglais (technique)"],
+  "preferences": {
+    "salaire_min_fcfa": 0,
+    "type_contrat": ["CDI", "CDD", "Freelance"],
+    "domaines_preferes": ["Data", "Formation", "IT", "Conseil"]
+  }
+}
