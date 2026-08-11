@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-        MON AGENT DE CARRIÈRE  —  Armel Raoul N'GUESSAN
+        MON AGENT DE CARRIÈRE  —  Dr Armel Raoul N'GUESSAN KOFFI
 Cherche de vraies offres (Adzuna) + offres locales, les note,
 rédige lettres, fiches d'entretien et CV. Clés : config/cles_api.json
 en local, ou st.secrets si hébergé.

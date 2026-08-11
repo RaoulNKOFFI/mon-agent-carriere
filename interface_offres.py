@@ -153,8 +153,7 @@ with onglet2:
 with onglet3:
     st.subheader("📄 Générer mon CV")
     st.write("Créez un CV professionnel à partir de votre profil. "
-             "Vous pouvez aussi le **cibler sur un poste** précis : les compétences "
-             "correspondantes remontent en tête.")
+             "Ciblez un poste : les compétences correspondantes remontent en tête.")
     poste_cible = st.selectbox("Intitulé du poste (en-tête du CV)",
                                profil.get("postes_vises", ["Data Analyst"]))
     mots_cibles = st.text_input("Compétences à mettre en avant (optionnel, séparées par des virgules)",
@@ -165,7 +164,6 @@ with onglet3:
             offre_fictive = {"titre": poste_cible, "entreprise": "",
                              "description": mots_cibles, "competences_requises": [
                                  m.strip() for m in mots_cibles.split(",") if m.strip()]}
-        # forcer le titre choisi
         prof2 = dict(profil); prof2["postes_vises"] = [poste_cible] + profil.get("postes_vises", [])
         cv_bytes = generer_cv(prof2, offre=offre_fictive, en_memoire=True)
         st.success("✅ CV généré !")
@@ -173,8 +171,8 @@ with onglet3:
             file_name=f"CV_{re.sub(r'[^A-Za-z0-9]','_',profil['nom'])}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
     st.divider()
-    st.caption("💡 Astuce : les expériences et le résumé du CV se modifient dans "
-               "config/mon_profil.json (section « cv »).")
+    st.caption("💡 Le contenu du CV (résumé, expériences, projets…) se modifie dans "
+               "config/mon_profil.json, section « cv ».")
 
 # ---------------- ONGLET 4 : suivi ----------------
 with onglet4:
