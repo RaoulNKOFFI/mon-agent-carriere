@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
         MON AGENT DE CARRIÈRE  —  Dr Armel Raoul N'GUESSAN KOFFI
-Cherche de vraies offres (Adzuna) + offres locales, les note,
-rédige lettres, fiches d'entretien et CV. Clés : config/cles_api.json
-en local, ou st.secrets si hébergé.
+Sources de vraies offres : Careerjet (couvre la Côte d'Ivoire !) + Adzuna
+(télétravail) + offres locales collées à la main. Scoring, lettres,
+fiches d'entretien et CV. Clés : config/cles_api.json (local) ou st.secrets.
 """
-import json, csv, os, re, sys, datetime as dt
+import json, csv, os, re, sys, base64, datetime as dt
 
 BASE   = os.path.dirname(os.path.abspath(__file__))
 CONFIG = os.path.join(BASE, "config")
@@ -23,9 +23,13 @@ def charger_cles():
         return json.load(open(chemin, encoding="utf-8"))
     try:
         import streamlit as st
+        cj  = st.secrets.get("careerjet", {})
         adz = st.secrets.get("adzuna", {})
         ant = st.secrets.get("anthropic", {})
         return {
+            "careerjet": {"actif": bool(cj.get("api_key")),
+                          "api_key": cj.get("api_key", ""),
+                          "locale": cj.get("locale", "fr_CI")},
             "adzuna": {"actif": bool(adz.get("app_id")),
                        "app_id": adz.get("app_id", ""), "app_key": adz.get("app_key", "")},
             "anthropic": {"actif": bool(ant.get("actif", False)),
@@ -34,31 +38,94 @@ def charger_cles():
             "email_recap": {"actif": False},
         }
     except Exception:
-        return {"adzuna": {"actif": False}, "anthropic": {"actif": False},
-                "email_recap": {"actif": False}}
+        return {"careerjet": {"actif": False}, "adzuna": {"actif": False},
+                "anthropic": {"actif": False}, "email_recap": {"actif": False}}
 
 
-def rechercher_offres_reelles(profil, cles):
+# ================================================================== #
+#  CAREERJET — couvre la Côte d'Ivoire (API v4)
+# ================================================================== #
+def rechercher_offres_careerjet(profil, cles):
+    conf = cles.get("careerjet", {})
+    if not conf.get("actif"):
+        return []
+    import urllib.request, urllib.parse
+    rech = profil["recherche"]
+    locale = conf.get("locale", "fr_CI")
+    location = rech.get("localisation_locale", "Côte d'Ivoire")
+    api_key = conf["api_key"]
+    cred = base64.b64encode(f"{api_key}:".encode()).decode()
+    headers = {
+        "Authorization": f"Basic {cred}",
+        "Content-Type": "application/json",
+        "Referer": "https://armel-agent.streamlit.app/",
+    }
+    toutes = []
+    for mot in rech["mots_cles_locaux"]:
+        params = {
+            "locale_code": locale,
+            "keywords": mot,
+            "location": location,
+            "sort": "date",
+            "page": 1,
+            "page_size": rech.get("resultats_par_recherche", 20),
+            "user_ip": "196.10.0.1",
+            "user_agent": "MonAgentCarriere/1.0 (Streamlit)",
+        }
+        url = "https://search.api.careerjet.net/v4/query?" + urllib.parse.urlencode(params)
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=15) as r:
+                data = json.load(r)
+            if data.get("type") != "JOBS":
+                continue
+            for j in data.get("jobs", []):
+                import hashlib
+                cle_unique = (j.get("url", "") or (j.get("title","")+j.get("company","")))
+                ident = "CJ_" + hashlib.md5(cle_unique.encode()).hexdigest()[:16]
+                toutes.append({
+                    "id": ident,
+                    "titre": (j.get("title") or "").strip(),
+                    "entreprise": (j.get("company") or "N/C").strip(),
+                    "localisation": (j.get("locations") or "Côte d'Ivoire").strip(),
+                    "salaire_fcfa": 0,
+                    "type_contrat": "N/C",
+                    "competences_requises": _extraire_competences(j.get("description",""), profil),
+                    "description": (j.get("description") or "")[:300],
+                    "url": j.get("url", ""),
+                })
+        except Exception as e:
+            print(f"⚠️  Careerjet — erreur pour « {mot} » : {e}")
+    vus, uniques = set(), []
+    for o in toutes:
+        if o["id"] not in vus: vus.add(o["id"]); uniques.append(o)
+    if uniques:
+        print(f"🇨🇮 {len(uniques)} offres Careerjet (Côte d'Ivoire).\n")
+    return uniques
+
+
+# ================================================================== #
+#  ADZUNA — télétravail (optionnel)
+# ================================================================== #
+def rechercher_offres_adzuna(profil, cles):
     conf = cles.get("adzuna", {})
     if not conf.get("actif"):
-        print("ℹ️  Adzuna inactif → MODE DÉMO.\n")
-        return _offres_demo(), "demo"
+        return []
     import urllib.request, urllib.parse
     rech = profil["recherche"]; pays = rech.get("pays_code", "fr")
     toutes = []
-    for mot in rech["mots_cles"]:
+    for mot in rech.get("mots_cles_remote", []):
         params = {"app_id": conf["app_id"], "app_key": conf["app_key"],
-                  "what": mot, "where": rech.get("localisation_recherche", ""),
+                  "what": mot, "where": rech.get("localisation_remote", "France"),
                   "results_per_page": rech.get("resultats_par_recherche", 20),
                   "content-type": "application/json"}
-        if rech.get("rayon_km"): params["distance"] = rech["rayon_km"]
         url = f"https://api.adzuna.com/v1/api/jobs/{pays}/search/1?" + urllib.parse.urlencode(params)
         try:
             with urllib.request.urlopen(url, timeout=15) as r:
                 data = json.load(r)
             for j in data.get("results", []):
                 toutes.append({
-                    "id": str(j.get("id")), "titre": (j.get("title") or "").strip(),
+                    "id": "ADZ_"+str(j.get("id")), "titre": (j.get("title") or "").strip(),
                     "entreprise": (j.get("company", {}) or {}).get("display_name", "N/C"),
                     "localisation": (j.get("location", {}) or {}).get("display_name", "N/C"),
                     "salaire_fcfa": int(j.get("salary_min") or 0),
@@ -67,12 +134,9 @@ def rechercher_offres_reelles(profil, cles):
                     "description": (j.get("description") or "")[:300],
                     "url": j.get("redirect_url", "")})
         except Exception as e:
-            print(f"⚠️  Erreur API pour « {mot} » : {e}")
-    vus, uniques = set(), []
-    for o in toutes:
-        if o["id"] not in vus: vus.add(o["id"]); uniques.append(o)
-    print(f"🌐 {len(uniques)} vraies offres via Adzuna.\n")
-    return uniques, "adzuna"
+            print(f"⚠️  Adzuna — erreur pour « {mot} » : {e}")
+    return toutes
+
 
 def _extraire_competences(description, profil):
     desc = (description or "").lower()
@@ -88,10 +152,6 @@ def _offres_demo():
          "salaire_fcfa":1800000,"type_contrat":"CDI",
          "competences_requises":["SQL","ETL","Modélisation dimensionnelle","Python","Data profiling"],
          "description":"Concevoir et maintenir l'entrepôt de données.","url":""},
-        {"id":"D003","titre":"Consultant Business Intelligence","entreprise":"Deloitte","localisation":"Remote",
-         "salaire_fcfa":1500000,"type_contrat":"Freelance",
-         "competences_requises":["Power BI","DAX","SQL","Data visualization"],
-         "description":"Mettre en place des solutions BI chez des clients grands comptes.","url":""},
     ]
 
 
@@ -120,6 +180,28 @@ def rechercher_offres_locales(profil):
     return offres
 
 
+def rechercher_toutes_offres(profil, cles):
+    """Agrège toutes les sources : locales + Careerjet + Adzuna (+ démo si rien)."""
+    sources = []
+    off = rechercher_offres_locales(profil)
+    if off: sources.append(("locale", off))
+    cj = rechercher_offres_careerjet(profil, cles)
+    if cj: sources.append(("careerjet", cj))
+    adz = rechercher_offres_adzuna(profil, cles)
+    if adz:
+        print(f"🌐 {len(adz)} offres Adzuna (télétravail).\n"); sources.append(("adzuna", adz))
+    if not sources:
+        print("ℹ️  Aucune API active → MODE DÉMO.\n")
+        return _offres_demo(), "demo"
+    toutes, noms = [], []
+    for nom, lst in sources:
+        toutes += lst; noms.append(nom)
+    return toutes, "+".join(noms)
+
+
+# ================================================================== #
+#  Mémoire · Filtrage · Scoring
+# ================================================================== #
 def charger_memoire():
     return json.load(open(MEM, encoding="utf-8")) if os.path.exists(MEM) \
            else {"offres_vues": [], "historique": []}
@@ -153,7 +235,7 @@ def scorer_offres(offres, profil):
         s_comp = (len([c for c in req if c in mes])/len(req)) if req else 0.4
         titre = o["titre"].lower()
         s_titre = 1.0 if any(p in titre or titre in p for p in postes) else \
-                  (0.5 if any(m in titre for m in ["data","analyst","bi","formateur","données"]) else 0.0)
+                  (0.5 if any(m in titre for m in ["data","analyst","bi","formateur","données","analytics"]) else 0.0)
         dom = 1.0 if any(d.lower() in (o["titre"]+o["description"]).lower()
                          for d in profil["preferences"]["domaines_preferes"]) else 0.3
         o["score"] = round(min(60*s_comp + 20*s_titre + 20*dom, 100), 1)
@@ -237,10 +319,7 @@ def fiche_entretien(offre, profil):
 def lancer(top_n=5):
     print("="*64); print(" MON AGENT DE CARRIÈRE — démarrage"); print("="*64)
     profil, cles, mem = charger_profil(), charger_cles(), charger_memoire()
-    offres_loc = rechercher_offres_locales(profil)
-    offres_web, source = rechercher_offres_reelles(profil, cles)
-    offres = offres_loc + offres_web
-    source = "locale+" + source if offres_loc else source
+    offres, source = rechercher_toutes_offres(profil, cles)
     avant = len(offres)
     offres = filtrer_nouvelles(offres, mem)
     print(f"🧠 {len(offres)} nouvelles ({avant-len(offres)} déjà vues ignorées).")
@@ -269,7 +348,7 @@ def lancer(top_n=5):
         w.writerows(lignes)
     memoriser(classees[:top_n], mem)
     print("="*64)
-    print(f" ✅ {len(resultats)} candidatures dans « sorties/ » (source : {source.upper()})")
+    print(f" ✅ {len(resultats)} candidatures dans « sorties/ » (sources : {source.upper()})")
     print("="*64)
     return resultats
 
