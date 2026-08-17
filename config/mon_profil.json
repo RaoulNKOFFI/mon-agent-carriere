@@ -9,10 +9,11 @@
   "objectif": "Occuper un poste de Data Analyst / Data Architect ou Formateur Data, à Abidjan ou en télétravail.",
 
   "recherche": {
-    "mots_cles": ["data analyst télétravail", "data analyst remote", "business intelligence remote", "data architect télétravail", "power bi remote"],
-    "localisation_recherche": "France",
+    "mots_cles_locaux": ["data analyst", "business intelligence", "data", "analyste de données", "power bi", "formateur informatique"],
+    "localisation_locale": "Côte d'Ivoire",
+    "mots_cles_remote": ["data analyst télétravail", "data analyst remote", "business intelligence remote"],
+    "localisation_remote": "France",
     "pays_code": "fr",
-    "rayon_km": 0,
     "resultats_par_recherche": 20
   },
 
@@ -28,7 +29,7 @@
   "preferences": {
     "salaire_min_fcfa": 0,
     "type_contrat": ["CDI", "CDD", "Freelance"],
-    "domaines_preferes": ["Data", "Business Intelligence", "Analytics", "Conseil"]
+    "domaines_preferes": ["Data", "Business Intelligence", "Analytics", "Conseil", "Informatique", "Formation"]
   },
 
   "cv": {
