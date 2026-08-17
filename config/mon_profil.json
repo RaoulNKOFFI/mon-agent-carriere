@@ -1,0 +1,128 @@
+{
+  "nom": "Dr Armel Raoul N'GUESSAN KOFFI",
+  "email": "raoulnkof@gmail.com",
+  "telephone": "+225 07 07 46 48 44",
+  "titre_actuel": "Data Analyst / Data Architect — Docteur en Ingénierie des Systèmes, PMP®",
+  "localisation": "Abidjan, Côte d'Ivoire",
+  "linkedin": "linkedin.com/in/dr-n-guessan-armel-raoul-koffi-phd",
+  "annees_experience": 10,
+  "objectif": "Occuper un poste de Data Analyst / Data Architect ou Formateur Data, à Abidjan ou en télétravail.",
+
+  "recherche": {
+    "mots_cles": ["data analyst télétravail", "data analyst remote", "business intelligence remote", "data architect télétravail", "power bi remote"],
+    "localisation_recherche": "France",
+    "pays_code": "fr",
+    "rayon_km": 0,
+    "resultats_par_recherche": 20
+  },
+
+  "postes_vises": ["Data Analyst", "Data Architect", "Consultant Business Intelligence", "Formateur Data & Analytics"],
+  "competences": [
+    "Excel avancé", "SQL", "Power BI", "DAX", "Power Query",
+    "Python", "NumPy", "pandas", "Matplotlib",
+    "Data Visualization", "Storytelling", "KPI & Dashboards",
+    "ETL / ELT", "Data Warehouse", "Data Lake", "OLTP / OLAP",
+    "Modélisation dimensionnelle (Star Schema)", "Data Governance", "Data Quality"
+  ],
+  "langues": ["Français (natif)", "Anglais (professionnel)"],
+  "preferences": {
+    "salaire_min_fcfa": 0,
+    "type_contrat": ["CDI", "CDD", "Freelance"],
+    "domaines_preferes": ["Data", "Business Intelligence", "Analytics", "Conseil"]
+  },
+
+  "cv": {
+    "resume_pro": "Data Analyst / Data Architect, docteur en ingénierie des systèmes et certifié PMP®, avec plus de 10 ans d'expérience dans l'analyse de données, la Business Intelligence et la conception d'architectures data. J'exploite des jeux de données réels pour produire des tableaux de bord décisionnels (Power BI), j'automatise des pipelines ETL/ELT et je modélise des entrepôts de données (schéma en étoile). Maîtrise de SQL, Python (NumPy, Pandas, Matplotlib), Excel avancé et DAX. En préparation des certifications Power BI PL-300 et Azure DP-900. Je vise un poste de Data Analyst / Data Architect, à Abidjan ou en télétravail.",
+
+    "competences_categories": [
+      {"categorie": "Analyse & BI", "items": ["Excel avancé", "Power BI", "DAX", "Power Query", "KPI & tableaux de bord", "Data Visualization", "Storytelling"]},
+      {"categorie": "Programmation & Requêtage", "items": ["SQL", "Python (NumPy, Pandas, Matplotlib)", "Nettoyage & préparation de données", "Analyse exploratoire (EDA)"]},
+      {"categorie": "Architectures Data", "items": ["ETL / ELT", "Data Warehouse", "Data Lake", "OLTP / OLAP", "Modélisation dimensionnelle (Star Schema)", "Data Governance", "Qualité des données"]},
+      {"categorie": "Méthode & pédagogie", "items": ["Gestion de projet (PMP®, Agile)", "Data-driven decision", "Formation & vulgarisation data"]}
+    ],
+
+    "experiences": [
+      {
+        "poste": "Consultant Formateur — Compétences numériques (aligné ICDL)",
+        "entreprise": "TransNumerik SAS / CEDITECH — Programme PADCI",
+        "periode": "Août 2024 — Présent",
+        "lieu": "Abidjan",
+        "taches": [
+          "Formateur consultant depuis le 03 août 2024 dans le cadre du programme PADCI (fonction publique), sur une formation alignée sur le référentiel international ICDL.",
+          "Animation d'un module de 4 jours (24 heures) auprès de 29 auditeurs de la fonction publique.",
+          "Conception de supports pédagogiques, d'exercices pratiques et d'évaluations par compétences (approche 90 % pratique)."
+        ]
+      },
+      {
+        "poste": "Formateur Python & Data Analytics",
+        "entreprise": "SCI Education — USA (distanciel)",
+        "periode": "Oct. 2025 — Présent",
+        "lieu": "Télétravail",
+        "taches": [
+          "Enseignement de Python appliqué à l'analyse de données : NumPy, Pandas, Matplotlib.",
+          "Encadrement de projets data de bout en bout (ingestion, nettoyage, EDA, visualisation).",
+          "Conception de jeux de données et d'exercices pratiques orientés analyse."
+        ]
+      },
+      {
+        "poste": "Data & Analytics Lead (Delivery Manager)",
+        "entreprise": "Leanios — Solutions industrielles (ERP, MES, WMS)",
+        "periode": "2023 — Présent",
+        "lieu": "Abidjan",
+        "taches": [
+          "Conception d'architectures data et de pipelines analytiques (ETL) pour l'exploitation des données industrielles.",
+          "Mise en place de KPI opérationnels et de tableaux de bord décisionnels.",
+          "Amélioration mesurée de +30 % de la productivité grâce à l'analyse et au pilotage par la donnée."
+        ]
+      },
+      {
+        "poste": "Consultant / Formateur Business Intelligence",
+        "entreprise": "EBURKA Conseils / PRACTIS (indépendant)",
+        "periode": "2019 — Présent",
+        "lieu": "Côte d'Ivoire",
+        "taches": [
+          "Missions Power BI et analyse de données pour des clients grands comptes (NSIA, TEDIS Pharma, SIPEFCI, Tongon Mine, Digital Virgo…).",
+          "Construction de modèles de données, mesures DAX et tableaux de bord orientés décision.",
+          "Automatisation de reportings et accompagnement à l'adoption des outils data."
+        ]
+      },
+      {
+        "poste": "Analyste & Concepteur de tableaux de bord (Power BI)",
+        "entreprise": "Ministère de la Justice (DIEM)",
+        "periode": "2013 — Présent",
+        "lieu": "Abidjan",
+        "taches": [
+          "Conception de tableaux de bord et d'indicateurs de pilotage sous Power BI.",
+          "Structuration et préparation des données métiers pour l'analyse et le reporting."
+        ]
+      }
+    ],
+
+    "projets": [
+      {"titre": "Architectures Data & pipelines ETL (Leanios)", "detail": "Pipelines analytiques et KPI MES/WMS ayant contribué à +30 % de productivité."},
+      {"titre": "Labs Data Analytics de bout en bout", "detail": "Notebooks Jupyter guidés sur jeux de données réels : ingestion, nettoyage, EDA, modélisation (schéma en étoile), visualisation et capstone."},
+      {"titre": "Entrepôt de données décisionnel", "detail": "Pipeline ETL Python + SQLite : profilage, modélisation dimensionnelle et tests qualité automatisés (data quality gate)."},
+      {"titre": "Agent d'analyse d'offres (Python/Streamlit)", "detail": "Application web déployée : scoring de données, génération de documents et tableaux de suivi."}
+    ],
+
+    "formations": [
+      {"intitule": "Doctorat — Ingénierie des Systèmes (Data, Logistique, IA), ISAE Supméca / ISM Paris", "annee": "2025"},
+      {"intitule": "Executive Master — Data Science, Big Data & IA, ISM Paris", "annee": "2022"},
+      {"intitule": "Licence MIAGE (Méthodes Informatiques Appliquées à la Gestion), Abidjan", "annee": "2013"}
+    ],
+
+    "certifications": [
+      {"intitule": "PMP® — Project Management Professional, PMI", "annee": "2025–2028"},
+      {"intitule": "Microsoft Power BI Data Analyst — PL-300 (en préparation)", "annee": ""},
+      {"intitule": "Microsoft Azure Data Fundamentals — DP-900 (en préparation)", "annee": ""},
+      {"intitule": "GenAI for Project Managers, PMI / Microsoft", "annee": "2025"}
+    ],
+
+    "atouts": [
+      "Docteur en ingénierie des systèmes orienté data + certifié PMP® : expertise analytique et rigueur projet",
+      "Maîtrise de la chaîne data complète : SQL/ETL → Data Warehouse/Lake → modélisation → Power BI",
+      "+30 % de productivité mesurée par le pilotage data ; 100+ professionnels formés à la data",
+      "Approche data-driven, forte capacité de visualisation et de storytelling décisionnel"
+    ]
+  }
+}
