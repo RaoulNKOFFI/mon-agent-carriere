@@ -1,0 +1,6 @@
+config/cles_api.json
+memoire.json
+sorties/
+__pycache__/
+*.pyc
+.streamlit/secrets.toml
